@@ -44,8 +44,7 @@ def connect_ssh(config):
     return ssh
 
 def __upload_file(local_path, remote_path, args, sftp):
-    if not args.list_only:
-        sftp.put(local_path, remote_path)
+    sftp.put(local_path, remote_path)
 
 def COMMAND_update_remote(args):
     inp = ""
@@ -55,7 +54,7 @@ def COMMAND_update_remote(args):
         with open(args.from_file, "r") as f:
             inp = f.read()
 
-    files = inp.strip().split("\n")
+    files = set(inp.strip().split("\n"))
     files_path = list(filter(lambda x: os.path.isfile(x), map(lambda x: os.path.abspath(x), files)))
 
     print(f"{YELLOW}[Total de arquivos para atualizar: {len(files_path)}]{NC}", flush=True)
