@@ -54,13 +54,22 @@ def COMMAND_update_remote(args):
         with open(args.from_file, "r") as f:
             inp = f.read()
 
-    files = set(inp.strip().split("\n"))
-    files_path = list(filter(lambda x: os.path.isfile(x), map(lambda x: os.path.abspath(x), files)))
+    files = list(set(inp.strip().split("\n")))
 
-    print(f"{YELLOW}[Total de arquivos para atualizar: {len(files_path)}]{NC}", flush=True)
-
+    files_path = list(map(lambda x: os.path.abspath(x), files))
     num_files = len(files_path)
-    if num_files == 0:
+
+    files_path_filtered = list(filter(lambda x: os.path.isfile(x), files_path))
+    num_files_filtered = len(files_path_filtered)
+
+    files_path_discarded = list(set(files_path) - set(files_path_filtered))
+    num_files_discarded = num_files - num_files_filtered
+
+
+    print(f"{YELLOW}[Total de arquivos descartados: {num_files_discarded}]{NC}", flush=True)
+    print(f"{YELLOW}[Total de arquivos para atualizar: {num_files_filtered}]{NC}", flush=True)
+
+    if num_files_filtered == 0:
         return
 
     config = get_sftp_config()
@@ -69,15 +78,18 @@ def COMMAND_update_remote(args):
         ssh = connect_ssh(config)
         sftp = ssh.open_sftp()
 
-    print(f"{YELLOW}[Lista de arquivos para atualizar]{NC}", flush=True)
+    print(f"{YELLOW}[Lista de arquivos descartados]{NC}", flush=True)
+    for i, local_path in enumerate(files_path_discarded):
+        print(f"[{str(i+1).zfill(2)}/{str(num_files_discarded).zfill(2)}]{CYAN}[local: {local_path}]{NC}", flush=True)
 
-    for i, local_path in enumerate(files_path):
+    print(f"{YELLOW}[Lista de arquivos para atualizar]{NC}", flush=True)
+    for i, local_path in enumerate(files_path_filtered):
         remote_path = os.path.join(config["remotePath"], os.path.relpath(local_path, os.getcwd())).replace("\\", "/")
 
         if not args.list_only:
             __upload_file(local_path, remote_path, args, sftp)
 
-        print(f"[{str(i+1).zfill(2)}/{str(num_files).zfill(2)}]{CYAN}[local: {local_path}]{NC} -> {MAGENTA}[remote: {remote_path}]{NC}", flush=True)
+        print(f"[{str(i+1).zfill(2)}/{str(num_files_filtered).zfill(2)}]{CYAN}[local: {local_path}]{NC} -> {MAGENTA}[remote: {remote_path}]{NC}", flush=True)
 
     if not args.list_only:
         sftp.close()
