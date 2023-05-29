@@ -1,0 +1,52 @@
+{
+    "prog": "gats",
+    "subcommands": {
+        "config": {
+            "create": [
+                {
+                    "args": [
+                        "config_name"
+                    ]
+                }
+            ],
+            "remove": [
+                {
+                    "args": [
+                        "config_name"
+                    ]
+                }
+            ]
+        },
+        "sftp": {
+            "update_remote": [
+                {
+                    "args": [
+                        "--list-only"
+                    ],
+                    "kwargs": {
+                        "action": "store_true",
+                        "default": false
+                    }
+                },
+                {
+                    "args": [
+                        "-i",
+                        "--input"
+                    ],
+                    "kwargs": {
+                        "default": "-"
+                    }
+                },
+                {
+                    "args": [
+                        "config"
+                    ],
+                    "kwargs": {
+                        "nargs": "*",
+                        "default": []
+                    }
+                }
+            ]
+        }
+    }
+}
